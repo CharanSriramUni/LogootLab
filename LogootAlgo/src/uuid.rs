@@ -1,118 +1,111 @@
-#[derive(Debug)]
-pub struct UUID {    
-    pub site_id: Vec<u8>,
+#[derive(Debug, Clone)]
+pub struct Identifier {
+    pub position: u8,
+    pub site_id: u8
 }
 
-impl Eq for UUID {}
-impl PartialEq for UUID {
+impl Eq for Identifier {}
+impl PartialEq for Identifier {
     fn eq(&self, other: &Self) -> bool {
-        self.site_id == other.site_id
+        self.position == other.position && self.site_id == other.site_id
     }
 }
 
-impl PartialOrd for UUID {
+impl Ord for Identifier {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+impl PartialOrd for Identifier {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        if self == other {
-            Some(std::cmp::Ordering::Equal)
+        if (self.position < other.position) || (self.position == other.position && self.site_id < other.site_id) {
+            Some(std::cmp::Ordering::Less)
         } else {
-            let mut i = 0;
-            while i < self.site_id.len() && i < other.site_id.len() {
-                if self.site_id[i] < other.site_id[i] {
-                    return Some(std::cmp::Ordering::Less);
-                } else if self.site_id[i] > other.site_id[i] {
-                    return Some(std::cmp::Ordering::Greater);
-                }
-                i += 1;
-            }
-
-            if self.site_id.len() < other.site_id.len() {
-                Some(std::cmp::Ordering::Less)
-            } else if self.site_id.len() > other.site_id.len() {
-                Some(std::cmp::Ordering::Greater)
-            } else {
-                // Equal lengths and contents
-                Some(std::cmp::Ordering::Equal)
-            }
+            Some(std::cmp::Ordering::Greater)
         }
     }
 }
 
-pub fn lsb(any: &UUID) -> u8 {
-    any.site_id[any.site_id.len() - 1]
+#[derive(Debug, Clone)]
+pub struct PID {
+    pub position: Vec<Identifier>,
+    pub logical_clock: u32
 }
 
-pub fn tuple_average(a: u8, b: u8) -> (u8, u8) {
-    let v = ((a as f32 + b as f32) / 2.0) * 10.0;
-    let v = v as u8;
-    
-    let value_1 = v / 10;
-    let value_2 = v % 10;
-    (value_1, value_2)
+impl Eq for PID {}
+impl PartialEq for PID {
+    fn eq(&self, other: &Self) -> bool {
+        self.position == other.position
+    }
 }
 
-impl UUID {
-    pub fn create_start() -> UUID {
-        let mut site_id = Vec::new();
-        site_id.push(0);
-        UUID { site_id }
+impl Ord for PID {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
     }
+}
 
-    pub fn create_end() -> UUID {
-        let mut site_id = Vec::new();
-        site_id.push(1);
-        UUID { site_id }
-    }
+impl PartialOrd for PID {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        let m = other.position.len();
+        let n = self.position.len();
 
-    pub fn generate_between(&self, other: &UUID) -> UUID {
-        let mut new_site_id: Vec<u8>;
-
-        if self.site_id.len() == other.site_id.len() {
-            let (v1, v2) = tuple_average(lsb(&self), lsb(&other));
-            new_site_id = self.site_id.clone();
-            new_site_id.push(v1);
-            new_site_id.push(v2);
-        }
-
-        if self < other {
-            if self.site_id.len() < other.site_id.len() {
-                let (v1, v2) = tuple_average(lsb(&other), 0);
-                new_site_id = self.site_id.clone();
-                new_site_id.push(v1);
-                if v2 != 0 {
-                    new_site_id.push(v2);
-                }
-            } else {
-                let (v1, v2) = tuple_average(lsb(&self), 10);
-                new_site_id = self.site_id.clone();
-                new_site_id.pop(); // Remove the top byte
-                new_site_id.push(v1);
-                if v2 != 0 {
-                    new_site_id.push(v2);
+        for j in 0..m {
+            let mut predecessors_are_fine = true;
+            for i in 0..j{
+                if self.position[i] != other.position[i] {
+                    predecessors_are_fine = false;
+                    break;
                 }
             }
-        } else if self > other {
-            if self.site_id.len() < other.site_id.len() {
-                let (v1, v2) = tuple_average(lsb(&other), 10);
-                new_site_id = other.site_id.clone();
-                new_site_id.pop(); 
-                new_site_id.push(v1);
-                if v2 != 0 {
-                    new_site_id.push(v2);
-                }
-            } else {
-                let (v1, v2) = tuple_average(lsb(&self), 0);
-                new_site_id = other.site_id.clone();
-                new_site_id.push(v1);
-                if v2 != 0 {
-                    new_site_id.push(v2);
+
+            let mut ordering_condition = false;
+            if predecessors_are_fine {
+                ordering_condition = j == n + 1 || self.position[j] < other.position[j];
+            }
+            
+            if predecessors_are_fine && ordering_condition {
+                return Some(std::cmp::Ordering::Less);
+            }
+        }
+        
+        for j in 0..n {
+            let mut predecessors_are_fine = true;
+            for i in 0..j{
+                if other.position[i] != self.position[i] {
+                    predecessors_are_fine = false;
+                    break;
                 }
             }
-        } else {
-            panic!("Cannot generate a UUID between two equal UUIDs")
+
+            let mut ordering_condition = false;
+            if predecessors_are_fine {
+                ordering_condition = j == m + 1 || other.position[j] < self.position[j];
+            }
+            
+            if predecessors_are_fine && ordering_condition {
+                return Some(std::cmp::Ordering::Greater);
+            }
         }
 
-        UUID {
-            site_id: new_site_id
+        panic!("Found a causal ordering that did not make sense in partial_cmp for PID");
+        //  Some(std::cmp::Ordering::Equal)
+    }
+}
+
+impl PID {
+    pub fn create_start() -> PID {
+        PID {
+            position: vec![Identifier { position: 0, site_id: 0 }],
+            logical_clock: 0
+        }
+    }
+
+    pub fn create_end() -> PID {
+        PID {
+            position: vec![Identifier { position: 255, site_id: 255 }],
+            logical_clock: 0
         }
     }
 }

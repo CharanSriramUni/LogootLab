@@ -1,14 +1,14 @@
 pub mod uuid;
 pub mod document;
 use document::Document;
-use uuid::UUID;
+use uuid::PID;
 use std::fs::File;
 use std::io::prelude::*;
 use similar::{ChangeTag, TextDiff};
 
-#[derive(Debug, PartialEq, Eq, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Clone)]
 pub struct Line {
-    identifier: UUID,
+    identifier: PID,
     content: String,
 }
 
@@ -37,6 +37,7 @@ fn main() {
 
     // Create a document with the lines
     let mut document = Document::new(lines);
+
 
     // Store the diffs from 0..1..2..3..4..5..6..7..8..9
     let mut diffs: Vec<Vec<Diff>> = Vec::new();
