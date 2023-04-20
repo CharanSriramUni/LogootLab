@@ -108,4 +108,12 @@ impl PID {
             logical_clock: 0
         }
     }
+
+    pub fn is_start(&self) -> bool {
+        self.position[0].position == 0 && self.position[0].site_id == 0
+    }
+
+    pub fn is_end(&self) -> bool {
+        self.position[0].position == 255 && self.position[0].site_id == 255
+    }
 }
