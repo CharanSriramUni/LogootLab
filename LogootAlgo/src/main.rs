@@ -1,5 +1,6 @@
 pub mod uuid;
 pub mod document;
+use document::Document;
 use uuid::UUID;
 use std::fs::File;
 use std::io::prelude::*;
