@@ -3,6 +3,12 @@ pub struct UUID {
     pub site_id: Vec<u8>,
 }
 
+impl UUID {
+    pub fn new() -> UUID {
+        UUID { site_id: Vec::new() }
+    }
+}
+
 impl Eq for UUID {}
 impl PartialEq for UUID {
     fn eq(&self, other: &Self) -> bool {
