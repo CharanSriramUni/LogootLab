@@ -6,14 +6,8 @@ use std::fs::File;
 use std::io::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd)]
-pub struct Identifier {
-    position: usize,
-    site_id: UUID
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd)]
 pub struct Line {
-    identifier: Identifier,
+    identifier: UUID,
     content: String,
 }
 

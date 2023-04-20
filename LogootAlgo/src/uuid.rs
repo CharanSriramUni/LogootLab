@@ -64,7 +64,7 @@ impl UUID {
     }
 
     pub fn generate_between(&self, other: &UUID) -> UUID {
-        let mut new_site_id = Vec::new();
+        let mut new_site_id: Vec<u8>;
 
         if self.site_id.len() == other.site_id.len() {
             let (v1, v2) = tuple_average(lsb(&self), lsb(&other));
