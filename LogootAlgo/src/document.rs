@@ -1,4 +1,10 @@
-use crate::{uuid::{PID}, Line};
+use crate::{uuid::{PID, Identifier}, Line};
+use rand::Rng;
+
+fn random(x: u8, y: u8) -> u8 {
+    let mut rng = rand::thread_rng();
+    rng.gen_range(x + 1..y)
+}
 
 impl Ord for Line {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
@@ -6,10 +12,15 @@ impl Ord for Line {
     }
 }
 
-
 #[derive(Debug, PartialEq, Eq)]
 pub struct Document {
     lines: Vec<Line>,
+}
+
+impl Line {
+    pub fn pos_len(&self) -> usize {
+        self.identifier.position.len()
+    }
 }
 
 impl Document {
@@ -26,28 +37,66 @@ impl Document {
 
 
         document.lines.push(start_line);
-        let mut last_line = &document.lines[document.lines.len() - 1];
-
-
-        for line in lines {
-            
-            let identifier = PID::generate_between(&last_line.identifier, &end_line.identifier);
-            let line = Line { identifier, content: line };
-            
-            document.lines.push(line);   
-                    
-            last_line = &document.lines[document.lines.len() - 1];
-        }
-
         document.lines.push(end_line);
+
+        let s = &document.lines[0];
+
+        // Insert beginning lines
+
 
         document
     }
 
-    // Adds a line to the document. You may need to search the document for the right place to insert the line
-    pub fn add(&mut self, uuid: PID, content: String) {
+    pub fn generate_between(&mut self, left: &Line, right: &Line, site: u8) -> Option<Vec<Identifier>> {
+        if left < right {
+            return None;    
+        } 
+
+        let left = &left.identifier.position;
+        let right = &right.identifier.position;
         
+        let mut new_pos = Vec::<Identifier>::new();
+        for i in 0..left.len() {
+            let l = &left[i];
+            let r = &right[i];
+
+            if l.position == r.position && l.site_id == r.site_id {
+                new_pos.push(Identifier { position: l.position, site_id: l.site_id });
+                continue;
+            }
+
+            let d = r.position - l.position;
+            if d > 1 {
+                let r  = random(l.position, r.position);
+                new_pos.push(Identifier { position: r, site_id: site });
+            } else if d == 1 {
+
+            } else {
+                
+            }
+        }
+
+
+        Some(new_pos)
     }
+
+    // pub fn prefix(position: &Line, index: u32) {
+        
+    // }
+
+    // pub fn generate_line_positions(&mut self, p_ind: usize, q_ind: usize, lines: Vec<String>, s: u8) {
+    //     let p = &self.lines[p_ind];
+    //     let q = &self.lines[q_ind];
+    //     let N = lines.len() as u32;
+
+    //     let mut index = 0;
+    //     let mut interval = 0;
+
+    //     while interval < N {
+    //         index += 1;
+            
+    //     }
+    // }
 
     // Convert to a binary search version
     pub fn remove(&mut self, identifier: &PID) {
@@ -66,5 +115,3 @@ impl Document {
         &self.lines
     }
 }
-
-
