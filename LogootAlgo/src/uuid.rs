@@ -1,16 +1,29 @@
-#[derive(Debug)]
-pub struct UUID {    
-    pub site_id: Vec<u8>,
+#[derive(Debug, Clone)]
+pub struct Identifier {
+    pub position: u8,
+    pub site_id: u8
 }
 
-impl Eq for UUID {}
-impl PartialEq for UUID {
+#[derive(Debug, Clone)]
+pub struct PID {
+    pub site_id: Vec<Identifier>,
+    pub logical_clock: u32
+}
+
+impl Eq for PID {}
+impl PartialEq for PID {
     fn eq(&self, other: &Self) -> bool {
         self.site_id == other.site_id
     }
 }
 
-impl PartialOrd for UUID {
+impl Ord for PID {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+impl PartialOrd for PID {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         if self == other {
             Some(std::cmp::Ordering::Equal)
@@ -37,33 +50,20 @@ impl PartialOrd for UUID {
     }
 }
 
-pub fn lsb(any: &UUID) -> u8 {
-    any.site_id[any.site_id.len() - 1]
-}
-
-pub fn tuple_average(a: u8, b: u8) -> (u8, u8) {
-    let v = ((a as f32 + b as f32) / 2.0) * 10.0;
-    let v = v as u8;
-    
-    let value_1 = v / 10;
-    let value_2 = v % 10;
-    (value_1, value_2)
-}
-
-impl UUID {
-    pub fn create_start() -> UUID {
+impl PID {
+    pub fn create_start() -> PID {
         let mut site_id = Vec::new();
         site_id.push(0);
-        UUID { site_id }
+        PID { site_id }
     }
 
-    pub fn create_end() -> UUID {
+    pub fn create_end() -> PID {
         let mut site_id = Vec::new();
         site_id.push(1);
-        UUID { site_id }
+        PID { site_id }
     }
 
-    pub fn generate_between(&self, other: &UUID) -> UUID {
+    pub fn generate_between(&self, other: &PID) -> PID {
         let mut new_site_id: Vec<u8>;
 
         if self.site_id.len() == other.site_id.len() {
@@ -108,10 +108,10 @@ impl UUID {
                 }
             }
         } else {
-            panic!("Cannot generate a UUID between two equal UUIDs")
+            panic!("Cannot generate a PID between two equal PIDs")
         }
 
-        UUID {
+        PID {
             site_id: new_site_id
         }
     }

@@ -1,13 +1,13 @@
 pub mod uuid;
 pub mod document;
 use document::Document;
-use uuid::UUID;
+use uuid::PID;
 use std::fs::File;
 use std::io::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Clone)]
 pub struct Line {
-    identifier: UUID,
+    identifier: PID,
     content: String,
 }
 
