@@ -79,7 +79,7 @@ impl UUID {
                 }
             }
         } else if self > other {
-            if other.site_id.len() < self.site_id.len() {
+            if self.site_id.len() < other.site_id.len() {
                 let (v1, v2) = tuple_average(lsb(&other), 10);
                 new_site_id = other.site_id.clone();
                 new_site_id.pop(); 
