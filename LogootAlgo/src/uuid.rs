@@ -82,6 +82,7 @@ impl UUID {
             if other.site_id.len() < self.site_id.len() {
                 let (v1, v2) = tuple_average(lsb(&other), 10);
                 new_site_id = other.site_id.clone();
+                new_site_id.pop(); 
                 new_site_id.push(v1);
                 if v2 != 0 {
                     new_site_id.push(v2);
@@ -89,7 +90,6 @@ impl UUID {
             } else {
                 let (v1, v2) = tuple_average(lsb(&self), 0);
                 new_site_id = other.site_id.clone();
-                new_site_id.pop(); // Remove the top byte
                 new_site_id.push(v1);
                 if v2 != 0 {
                     new_site_id.push(v2);
