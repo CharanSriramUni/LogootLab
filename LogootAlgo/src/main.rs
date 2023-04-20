@@ -6,14 +6,8 @@ use std::fs::File;
 use std::io::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd)]
-pub struct Identifier {
-    position: usize,
-    site_id: UUID
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd)]
 pub struct Line {
-    identifier: Identifier,
+    identifier: UUID,
     content: String,
 }
 
@@ -33,7 +27,7 @@ fn main() {
     }
 
     // Create a document with the lines
-    let mut document = Document { lines: Vec::new() };
+    let mut document = Document::new(lines);
     
 
 
