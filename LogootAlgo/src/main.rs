@@ -33,7 +33,7 @@ fn main() {
     }
 
     // Create a document with the lines
-    let mut document = Document { lines: Vec::new() };
+    let mut document = Document::new(lines);
     
 
 

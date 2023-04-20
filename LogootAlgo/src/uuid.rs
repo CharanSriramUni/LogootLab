@@ -51,6 +51,18 @@ pub fn tuple_average(a: u8, b: u8) -> (u8, u8) {
 }
 
 impl UUID {
+    pub fn create_start() -> UUID {
+        let mut site_id = Vec::new();
+        site_id.push(0);
+        UUID { site_id }
+    }
+
+    pub fn create_end() -> UUID {
+        let mut site_id = Vec::new();
+        site_id.push(1);
+        UUID { site_id }
+    }
+
     pub fn generate_between(&self, other: &UUID) -> UUID {
         let mut new_site_id = Vec::new();
 
