@@ -42,12 +42,14 @@ impl Document {
         let s = &document.lines[0];
 
         // Insert beginning lines
-
+        for line in lines {
+            
+        }
 
         document
     }
 
-    pub fn generate_between(&mut self, left: &Line, right: &Line, site: u8) -> Option<Vec<Identifier>> {
+    pub fn generate_between(left: &Line, right: &Line, site: u8) -> Option<Vec<Identifier>> {
         if left < right {
             return None;    
         } 
@@ -70,14 +72,44 @@ impl Document {
                 let r  = random(l.position, r.position);
                 new_pos.push(Identifier { position: r, site_id: site });
             } else if d == 1 {
+                if site < l.site_id {
+                    new_pos.push(Identifier { position: l.position, site_id: site });
+                } else if site > l.site_id {
+                    new_pos.push(Identifier { position: r.position, site_id: site });
+                } else {
+                    let mut min: u8 = 0;
+                    if left.len() > right.len() {
+                        min = left[right.len()].position;
 
+                        if min == u8::MAX - 1 {
+                            let r = random(0, u8::MAX);
+                            new_pos.push(Identifier { position: l.position, site_id: l.site_id });
+                            new_pos.extend_from_slice(&left[right.len()..]);
+                            new_pos.push(Identifier { position: r, site_id: site });
+                        }
+                    }
+                    let r = random(0, u8::MAX);
+                    new_pos.push(Identifier { position: l.position, site_id: l.site_id });
+                    new_pos.push(Identifier { position: r, site_id: site });
+                }
             } else {
-                
+                if site > l.site_id && site < r.site_id {
+                    new_pos.push(Identifier { position: l.position, site_id: site });
+                } else {
+                    let r = random(0, u8::MAX);
+                    new_pos.push(Identifier { position: l.position, site_id: l.site_id });
+                    new_pos.push(Identifier { position: r, site_id: site });
+                }
             }
+            return Some(new_pos);
         }
 
+        if right.len() > left.len() {
+            let r = random(0, right[left.len()].position);
+            new_pos.push(Identifier { position: r, site_id: site });
+        }
 
-        Some(new_pos)
+        return Some(new_pos)
     }
 
     // pub fn prefix(position: &Line, index: u32) {
