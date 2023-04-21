@@ -44,7 +44,7 @@ fn main() {
     // Store the diffs from 0..1..2..3..4..5..6..7..8..9
     let mut diffs: Vec<Vec<Diff>> = Vec::new();
 
-    for i in 1..10 {
+    for i in 1..101 {
         // Read in the next version ../data/i.txt as a list of strings
         let path = format!("../DataProcessing/text/{}.txt", i);
         let mut new_content: String = String::new();
@@ -84,6 +84,15 @@ fn main() {
 
     let mut patches: Vec<Vec<Patch>> = Vec::new();
 
+    // print diffs
+    // for diff in &diffs {
+    //     for d in diff {
+    //     // print diff type and index
+    //         println!("{:?} {:?}", d.diff_type, d.index);
+    //     }
+    //     println!("");
+    // }    
+
 
     for diff in diffs {
         let mut i = 0;
@@ -120,30 +129,29 @@ fn main() {
 
         patches.push(patch_vec);
     }
+    
 
-    // Apply patches
-    // for patch in &patches {
-    //     for p in patch {
+    // Apply first patch
+    // document.apply_patches(&patches[0].clone(), true); // 1.txt
+    // println!("");
+    // document.apply_patches(&patches[1].clone(), true); // 2.txt
+    // println!("");
+    // document.apply_patches(&patches[2].clone(), true); // 3.txt
+    // println!("");
+    // document.apply_patches(&patches[3].clone(), true); // 4.txt
+    // println!("");
+    // document.apply_patches(&patches[4].clone(), true); // 5.txt
+    // println!("");
+    // document.apply_patches(&patches[5].clone(), true); // 6.txt
+    // document.print(true);
 
-    //         // print operation, index, and len() diffs
-    //         println!("{:?} {} {}", p.diff_type, p.index, p.diffs.len());
-
-    //         // apply patch
-    //         document.apply_patch(p.clone());
-    //     }
+    // for i in 0..38 {
+    //     document.apply_patches(&patches[i].clone(), true);
     //     println!("");
     // }
 
-    // Apply first patch
-    for patch in &patches {
-        for p in patch {
-            document.apply_patch(p.clone());
-            // print operation, index, and len() diffs
-            println!("{:?} {} {}", p.diff_type, p.index, p.diffs.len());
-        }
+    for i in 0..100 {
+        document.apply_patches(&patches[i].clone(), true);
         println!("");
     }
-
-    document.print(true);
-
 }

@@ -69,27 +69,29 @@ impl PartialOrd for PID {
                 return Some(std::cmp::Ordering::Less);
             }
         }
+
+        return Some(std::cmp::Ordering::Greater);
         
-        for j in 0..n {
-            let mut predecessors_are_fine = true;
-            for i in 0..j{
-                if other.position[i] != self.position[i] {
-                    predecessors_are_fine = false;
-                    break;
-                }
-            }
+        // for j in 0..n {
+        //     let mut predecessors_are_fine = true;
+        //     for i in 0..j{
+        //         if other.position[i] != self.position[i] {
+        //             predecessors_are_fine = false;
+        //             break;
+        //         }
+        //     }
 
-            let mut ordering_condition = false;
-            if predecessors_are_fine {
-                ordering_condition = j == m + 1 || other.position[j] < self.position[j];
-            }
+        //     let mut ordering_condition = false;
+        //     if predecessors_are_fine {
+        //         ordering_condition = j == m + 1 || other.position[j] < self.position[j];
+        //     }
             
-            if predecessors_are_fine && ordering_condition {
-                return Some(std::cmp::Ordering::Greater);
-            }
-        }
+        //     if predecessors_are_fine && ordering_condition {
+        //         return Some(std::cmp::Ordering::Greater);
+        //     }
+        // }
 
-        panic!("Found a causal ordering that did not make sense in partial_cmp for PID");
+        // panic!("Found a causal ordering that did not make sense in partial_cmp for PID");
         //  Some(std::cmp::Ordering::Equal)
     }
 }
