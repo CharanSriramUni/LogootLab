@@ -1,4 +1,5 @@
 use crate::{uuid::{PID, Identifier}, Patch};
+use std::mem::{size_of, size_of_val};
 use similar::{ChangeTag};
 use rand::Rng;
 use convert_base::Convert;
@@ -29,6 +30,29 @@ impl Line {
 }
 
 impl Document {
+    pub fn get_article_size(&self) -> usize {
+        let mut size = 0;
+
+        for line in &self.lines {
+            size += line.content.len();
+        }
+
+        size
+    }
+
+    pub fn get_logoot_size(&self) -> usize {
+        let mut size = 0;
+
+        for line in &self.lines {
+            let id = &line.identifier;
+            size += size_of::<u32>(); // for PID logical clock
+            let allocated_size = id.position.capacity() * size_of::<Identifier>();
+            size += allocated_size;
+        }
+
+        size
+    }
+
     pub fn new(lines: Vec<String>, site: u8) -> Document {
         let mut document = Document { lines: Vec::new() , site};
         
@@ -257,7 +281,7 @@ impl Document {
         //     }
         //     index += 1;
         // }
-        // Convert to a binary search version
+        // Binary search version
         let mut index = 0;
         let mut size = self.lines.len();
         while size > 0 {

@@ -3,10 +3,11 @@ pub mod document;
 use document::Document;
 use std::{fs::File};
 use std::io::prelude::*;
+use std::env;
 use similar::{ChangeTag, TextDiff};
 
 
-// create structure for storing diffs, basically a diff type and potentially a line
+// structures for storing diffs
 #[derive(Debug, PartialEq, Eq, PartialOrd, Clone)]
 pub struct Diff {
     diff_type: ChangeTag,
@@ -21,32 +22,60 @@ pub struct Patch {
     index: usize,
 }
 
+// take in stdargs
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    // -n is number of revisions
+    // -s is number of sentences included
+    let mut n: u32 = 20;
+    let mut s: u32 = 20;
+    let mut path = "../DataProcessing/text";
+
+    for i in 1..args.len() {
+        if args[i] == "-n" {
+            n = args[i+1].parse::<u32>().unwrap();
+        }
+        if args[i] == "-s" {
+            s = args[i+1].parse::<u32>().unwrap();
+        }
+        if args[i] == "-f" {
+            path = &args[i+1];
+        }
+    }
+
     // 100 files in ../data with versions of a Wikipedia article
 
     // Read in the first version ../data/0.txt as a list of strings
-    let path = "../DataProcessing/text/0.txt";
-    let mut file = File::open(path).expect("file not found");
+    let og = format!("{}/{}.txt", path, 0);
+    println!("{}", og);
+    let mut file = File::open(og).expect("file not found");
     let mut contents = String::new();
     file.read_to_string(&mut contents).expect("something went wrong reading the file");
 
     // Split by new line and add to array of strings
     let mut lines: Vec<String> = Vec::new();
+    // for i in 0..s {
+    //     let line = contents.lines().nth(i as usize).unwrap();
+    //     lines.push(line.to_string());
+    // }
+
     for line in contents.lines() {
+        if s == 0 {
+            break;
+        }
         lines.push(line.to_string());
+        s -= 1;
     }
 
     // Create a document with the lines
-    // only first 10 lines
-    // lines = lines[0..10].to_vec();
     let mut document = Document::new(lines, 0);
 
-    // Store the diffs from 0..1..2..3..4..5..6..7..8..9
+    // Store the diffs from 0..1..n
     let mut diffs: Vec<Vec<Diff>> = Vec::new();
 
-    for i in 1..101 {
+    for i in 1..n {
         // Read in the next version ../data/i.txt as a list of strings
-        let path = format!("../DataProcessing/text/{}.txt", i);
+        let path = format!("{}/{}.txt", path, i);
         let mut new_content: String = String::new();
         let mut file = File::open(path).expect("file not found");
 
@@ -131,27 +160,14 @@ fn main() {
     }
     
 
-    // Apply first patch
-    // document.apply_patches(&patches[0].clone(), true); // 1.txt
-    // println!("");
-    // document.apply_patches(&patches[1].clone(), true); // 2.txt
-    // println!("");
-    // document.apply_patches(&patches[2].clone(), true); // 3.txt
-    // println!("");
-    // document.apply_patches(&patches[3].clone(), true); // 4.txt
-    // println!("");
-    // document.apply_patches(&patches[4].clone(), true); // 5.txt
-    // println!("");
-    // document.apply_patches(&patches[5].clone(), true); // 6.txt
-    // document.print(true);
-
-    // for i in 0..38 {
-    //     document.apply_patches(&patches[i].clone(), true);
-    //     println!("");
-    // }
-
-    for i in 0..100 {
-        document.apply_patches(&patches[i].clone(), true);
-        println!("");
+    // Apply patches
+    for i in 0..n-1 {
+        let patch = patches[i as usize].clone();
+        document.apply_patches(&patch, false);
     }
+
+
+    // Print size of text
+    println!("LOGOOT SIZE: {}", document.get_logoot_size());
+    println!("ARTICLE SIZE: {}", document.get_article_size());
 }
